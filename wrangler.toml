@@ -4,8 +4,7 @@ compatibility_date = "2024-01-01"
 # Pages configuration
 pages_build_output_dir = "."
 
-# KV Namespace for project metadata (create after deployment)
-# Uncomment after creating KV namespace in Cloudflare dashboard
-# [[kv_namespaces]]
-# binding = "PROJECTS_KV"
-# id = "your-kv-namespace-id"
+# KV Namespace for project metadata
+[[kv_namespaces]]
+binding = "PROJECTS_KV"
+id = "dc92c0d46ae042d1811cc55ef40dccc3"
