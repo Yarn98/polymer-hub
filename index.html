@@ -608,81 +608,9 @@
     </div>
 
     <div class="projects-grid" id="projects-grid">
-      <!-- Projects will be loaded here dynamically -->
-
-      <!-- Example Static Project Card -->
-      <div class="project-card" data-category="prediction simulation">
-        <div class="project-thumbnail">
-          <span>📊</span>
-        </div>
-        <div class="project-content">
-          <div class="project-tags">
-            <span class="tag">Prediction</span>
-            <span class="tag">Physics</span>
-            <span class="tag">Interactive</span>
-          </div>
-          <h3 class="project-title">P(3HB-co-4HB) 물성 예측</h3>
-          <p class="project-description">
-            Physics-informed 모델 기반 코폴리머 물성 예측 시스템. Fox Equation, Flory Theory, V-Shape Crystallinity 적용.
-          </p>
-          <div class="project-footer">
-            <a href="https://4hb-p34hb-properties-modeling.pages.dev/" target="_blank" class="btn-small btn-launch">
-              🚀 Launch
-            </a>
-            <a href="#" class="btn-small btn-info">
-              📄 Details
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- Placeholder for future projects -->
-      <div class="project-card" data-category="simulation">
-        <div class="project-thumbnail" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-          <span>🔬</span>
-        </div>
-        <div class="project-content">
-          <div class="project-tags">
-            <span class="tag">MD</span>
-            <span class="tag">Simulation</span>
-          </div>
-          <h3 class="project-title">분자동역학 시뮬레이션</h3>
-          <p class="project-description">
-            고분자 체인의 분자동역학 시뮬레이션 및 물성 분석 도구 (Coming Soon)
-          </p>
-          <div class="project-footer">
-            <a href="#" class="btn-small btn-launch" style="opacity: 0.5; cursor: not-allowed;">
-              🔜 Coming Soon
-            </a>
-            <a href="#" class="btn-small btn-info">
-              📄 Details
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div class="project-card" data-category="analysis">
-        <div class="project-thumbnail" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-          <span>📈</span>
-        </div>
-        <div class="project-content">
-          <div class="project-tags">
-            <span class="tag">ML</span>
-            <span class="tag">Analysis</span>
-          </div>
-          <h3 class="project-title">중합 반응 최적화</h3>
-          <p class="project-description">
-            머신러닝 기반 중합 조건 최적화 및 수율 예측 시스템 (Coming Soon)
-          </p>
-          <div class="project-footer">
-            <a href="#" class="btn-small btn-launch" style="opacity: 0.5; cursor: not-allowed;">
-              🔜 Coming Soon
-            </a>
-            <a href="#" class="btn-small btn-info">
-              📄 Details
-            </a>
-          </div>
-        </div>
+      <!-- Projects will be loaded dynamically from API -->
+      <div style="text-align: center; padding: 3rem; color: var(--gray);">
+        <p>Loading projects...</p>
       </div>
     </div>
   </section>
@@ -880,30 +808,108 @@
     });
 
     // Initialize when page loads
-    window.addEventListener('load', init3D);
+    window.addEventListener('load', () => {
+      init3D();
+      loadProjects();
+    });
+
+    // Load projects from API
+    async function loadProjects() {
+      try {
+        const response = await fetch('/api/projects');
+        const data = await response.json();
+
+        if (data.success && data.projects) {
+          renderProjects(data.projects);
+        } else {
+          console.error('Failed to load projects:', data);
+          showError();
+        }
+      } catch (error) {
+        console.error('Error loading projects:', error);
+        showError();
+      }
+    }
+
+    // Render projects
+    function renderProjects(projects) {
+      const grid = document.getElementById('projects-grid');
+      grid.innerHTML = ''; // Clear loading message
+
+      projects.forEach(project => {
+        const card = createProjectCard(project);
+        grid.appendChild(card);
+      });
+
+      // Reinitialize filter functionality
+      initializeFilters();
+    }
+
+    // Create project card element
+    function createProjectCard(project) {
+      const card = document.createElement('div');
+      card.className = 'project-card';
+      card.dataset.category = project.category.join(' ');
+
+      const isComingSoon = project.status === 'coming-soon';
+      const launchButton = isComingSoon
+        ? `<a href="#" class="btn-small btn-launch" style="opacity: 0.5; cursor: not-allowed;">🔜 Coming Soon</a>`
+        : `<a href="${project.url}" target="_blank" class="btn-small btn-launch">🚀 Launch</a>`;
+
+      card.innerHTML = `
+        <div class="project-thumbnail" style="background: ${project.thumbnailGradient};">
+          <span>${project.thumbnail}</span>
+        </div>
+        <div class="project-content">
+          <div class="project-tags">
+            ${project.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+          </div>
+          <h3 class="project-title">${project.name}</h3>
+          <p class="project-description">${project.description}</p>
+          <div class="project-footer">
+            ${launchButton}
+            <a href="#" class="btn-small btn-info">📄 Details</a>
+          </div>
+        </div>
+      `;
+
+      return card;
+    }
+
+    // Show error message
+    function showError() {
+      const grid = document.getElementById('projects-grid');
+      grid.innerHTML = `
+        <div style="text-align: center; padding: 3rem; color: var(--accent);">
+          <p>⚠️ Failed to load projects. Please try again later.</p>
+        </div>
+      `;
+    }
 
     // Filter functionality
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const projectCards = document.querySelectorAll('.project-card');
+    function initializeFilters() {
+      const filterButtons = document.querySelectorAll('.filter-btn');
+      const projectCards = document.querySelectorAll('.project-card');
 
-    filterButtons.forEach(button => {
-      button.addEventListener('click', () => {
-        // Update active button
-        filterButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
+      filterButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          // Update active button
+          filterButtons.forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
 
-        const filter = button.dataset.filter;
+          const filter = button.dataset.filter;
 
-        // Filter projects
-        projectCards.forEach(card => {
-          if (filter === 'all' || card.dataset.category.includes(filter)) {
-            card.style.display = 'block';
-          } else {
-            card.style.display = 'none';
-          }
+          // Filter projects
+          projectCards.forEach(card => {
+            if (filter === 'all' || card.dataset.category.includes(filter)) {
+              card.style.display = 'block';
+            } else {
+              card.style.display = 'none';
+            }
+          });
         });
       });
-    });
+    }
 
     // Smooth scroll
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {

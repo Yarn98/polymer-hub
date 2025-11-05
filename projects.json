@@ -1,0 +1,50 @@
+[
+  {
+    "id": "p3hb-co-4hb",
+    "name": "P(3HB-co-4HB) 물성 예측",
+    "description": "Physics-informed 모델 기반 코폴리머 물성 예측 시스템. Fox Equation, Flory Theory, V-Shape Crystallinity 적용.",
+    "url": "https://4hb-p34hb-properties-modeling.pages.dev/",
+    "category": ["prediction", "simulation"],
+    "tags": ["Prediction", "Physics", "Interactive"],
+    "thumbnail": "📊",
+    "thumbnailGradient": "linear-gradient(135deg, #1e3c72 0%, #2a5298 100%)",
+    "featured": true,
+    "status": "active"
+  },
+  {
+    "id": "pha-process-tool",
+    "name": "PHA 공정 도구",
+    "description": "Polyhydroxyalkanoate(PHA) 생산 공정 최적화 및 모니터링 도구",
+    "url": "https://pha-process-tool-v2.pages.dev/",
+    "category": ["analysis", "simulation"],
+    "tags": ["PHA", "Process", "Optimization"],
+    "thumbnail": "🏭",
+    "thumbnailGradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "featured": true,
+    "status": "active"
+  },
+  {
+    "id": "straw-optimizer",
+    "name": "빨대 최적화 도구",
+    "description": "생분해성 빨대 소재 및 제조 조건 최적화 시스템",
+    "url": "https://straw-optimizer-v2.pages.dev/",
+    "category": ["analysis", "prediction"],
+    "tags": ["Biodegradable", "Optimization", "Manufacturing"],
+    "thumbnail": "🥤",
+    "thumbnailGradient": "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "featured": true,
+    "status": "active"
+  },
+  {
+    "id": "compounding-notebook",
+    "name": "컴파운딩 노트북",
+    "description": "고분자 컴파운딩 배합 설계 및 실험 데이터 관리 시스템",
+    "url": "https://compouding-notebook.pages.dev/",
+    "category": ["analysis"],
+    "tags": ["Compounding", "Data", "Formulation"],
+    "thumbnail": "📓",
+    "thumbnailGradient": "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
+    "featured": false,
+    "status": "active"
+  }
+]
