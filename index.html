@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Polymer Engineering Research Hub | 고분자 공학 연구</title>
+  <meta name="description" content="Polymer Engineering and Polymerization Research Projects - 고분자 공학 및 중합 연구 프로젝트"/>
+
+  <!-- Three.js for 3D Visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Brand Colors - Polymer Theme */
+      --primary: #1e3c72;
+      --primary-light: #2a5298;
+      --secondary: #00d4ff;
+      --accent: #ff6b6b;
+      --dark: #0f1419;
+      --light: #f8fafc;
+      --gray: #64748b;
+
+      /* Molecule Colors */
+      --carbon: #909090;
+      --oxygen: #ff0d0d;
+      --hydrogen: #ffffff;
+      --nitrogen: #3050f8;
+
+      --font-sans: 'Segoe UI', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+      --font-mono: 'Consolas', 'Monaco', monospace;
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.2);
+
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: linear-gradient(135deg, #0f1419 0%, #1a2332 100%);
+      color: var(--light);
+      overflow-x: hidden;
+    }
+
+    /* Header & Navigation */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(15, 20, 25, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1rem 2rem;
+    }
+
+    .nav {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--light);
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--light);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--secondary);
+      transition: var(--transition);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    /* Hero Section with 3D Background */
+    .hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #polymer-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 900px;
+      padding: 2rem;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(0, 212, 255, 0.15);
+      border: 1px solid var(--secondary);
+      color: var(--secondary);
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .hero h1 {
+      font-size: 4rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 1.5rem;
+      color: var(--gray);
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+
+    .hero-description {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 3rem;
+      line-height: 1.8;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 1rem 2.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: var(--secondary);
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+      40% { transform: translateX(-50%) translateY(-10px); }
+      60% { transform: translateX(-50%) translateY(-5px); }
+    }
+
+    /* Projects Section */
+    .section {
+      padding: 6rem 2rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-badge {
+      display: inline-block;
+      background: rgba(0, 212, 255, 0.1);
+      color: var(--secondary);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section h2 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      color: var(--light);
+    }
+
+    .section-description {
+      font-size: 1.2rem;
+      color: var(--gray);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.8;
+    }
+
+    /* Filter Bar */
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.75rem 1.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--light);
+      border-radius: 25px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    /* Project Cards */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--secondary);
+    }
+
+    .project-thumbnail {
+      width: 100%;
+      height: 240px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-thumbnail::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .project-content {
+      padding: 1.5rem;
+    }
+
+    .project-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      padding: 0.3rem 0.8rem;
+      background: rgba(0, 212, 255, 0.15);
+      color: var(--secondary);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .project-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--light);
+    }
+
+    .project-description {
+      color: var(--gray);
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .project-footer {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn-small {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      flex: 1;
+      text-align: center;
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .btn-launch {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-launch:hover {
+      background: var(--primary-light);
+    }
+
+    .btn-info {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--light);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-info:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* About Section */
+    .about-section {
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .about-text h3 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      color: var(--light);
+    }
+
+    .about-text p {
+      color: var(--gray);
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      font-size: 1.05rem;
+    }
+
+    .focus-areas {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .focus-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .focus-item h4 {
+      color: var(--secondary);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .focus-item p {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    /* Footer */
+    .footer {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 3rem 2rem;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--light);
+      text-decoration: none;
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .social-link:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: translateY(-3px);
+    }
+
+    .copyright {
+      color: var(--gray);
+      font-size: 0.9rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .hero h1 { font-size: 3rem; }
+      .about-content { grid-template-columns: 1fr; }
+      .focus-areas { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero-subtitle { font-size: 1.2rem; }
+      .section h2 { font-size: 2rem; }
+      .nav-links { display: none; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .cta-buttons { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <nav class="nav">
+      <a href="#" class="logo">
+        <div class="logo-icon">🧬</div>
+        <span>Polymer Hub</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Hero Section with 3D Polymer -->
+  <section class="hero">
+    <canvas id="polymer-canvas"></canvas>
+    <div class="hero-content">
+      <div class="hero-badge">Polymer Engineering & Polymerization</div>
+      <h1>고분자 공학 연구소</h1>
+      <p class="hero-subtitle">Polymer Engineering Research Hub</p>
+      <p class="hero-description">
+        Physics-informed 모델링부터 머신러닝 기반 예측까지,<br>
+        고분자 과학의 다양한 연구 프로젝트를 탐험하세요
+      </p>
+      <div class="cta-buttons">
+        <a href="#projects" class="btn btn-primary">
+          프로젝트 둘러보기 →
+        </a>
+        <a href="#about" class="btn btn-secondary">
+          연구 소개
+        </a>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="7 13 12 18 17 13"></polyline>
+        <polyline points="7 6 12 11 17 6"></polyline>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Projects Section -->
+  <section id="projects" class="section">
+    <div class="section-header">
+      <div class="section-badge">Research Projects</div>
+      <h2>연구 프로젝트</h2>
+      <p class="section-description">
+        물성 예측, 분자 시뮬레이션, 공정 최적화 등 다양한 고분자 공학 프로젝트
+      </p>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">전체</button>
+      <button class="filter-btn" data-filter="simulation">시뮬레이션</button>
+      <button class="filter-btn" data-filter="prediction">예측 모델</button>
+      <button class="filter-btn" data-filter="analysis">분석 도구</button>
+    </div>
+
+    <div class="projects-grid" id="projects-grid">
+      <!-- Projects will be loaded here dynamically -->
+
+      <!-- Example Static Project Card -->
+      <div class="project-card" data-category="prediction simulation">
+        <div class="project-thumbnail">
+          <span>📊</span>
+        </div>
+        <div class="project-content">
+          <div class="project-tags">
+            <span class="tag">Prediction</span>
+            <span class="tag">Physics</span>
+            <span class="tag">Interactive</span>
+          </div>
+          <h3 class="project-title">P(3HB-co-4HB) 물성 예측</h3>
+          <p class="project-description">
+            Physics-informed 모델 기반 코폴리머 물성 예측 시스템. Fox Equation, Flory Theory, V-Shape Crystallinity 적용.
+          </p>
+          <div class="project-footer">
+            <a href="https://4hb-p34hb-properties-modeling.pages.dev/" target="_blank" class="btn-small btn-launch">
+              🚀 Launch
+            </a>
+            <a href="#" class="btn-small btn-info">
+              📄 Details
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Placeholder for future projects -->
+      <div class="project-card" data-category="simulation">
+        <div class="project-thumbnail" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+          <span>🔬</span>
+        </div>
+        <div class="project-content">
+          <div class="project-tags">
+            <span class="tag">MD</span>
+            <span class="tag">Simulation</span>
+          </div>
+          <h3 class="project-title">분자동역학 시뮬레이션</h3>
+          <p class="project-description">
+            고분자 체인의 분자동역학 시뮬레이션 및 물성 분석 도구 (Coming Soon)
+          </p>
+          <div class="project-footer">
+            <a href="#" class="btn-small btn-launch" style="opacity: 0.5; cursor: not-allowed;">
+              🔜 Coming Soon
+            </a>
+            <a href="#" class="btn-small btn-info">
+              📄 Details
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="project-card" data-category="analysis">
+        <div class="project-thumbnail" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+          <span>📈</span>
+        </div>
+        <div class="project-content">
+          <div class="project-tags">
+            <span class="tag">ML</span>
+            <span class="tag">Analysis</span>
+          </div>
+          <h3 class="project-title">중합 반응 최적화</h3>
+          <p class="project-description">
+            머신러닝 기반 중합 조건 최적화 및 수율 예측 시스템 (Coming Soon)
+          </p>
+          <div class="project-footer">
+            <a href="#" class="btn-small btn-launch" style="opacity: 0.5; cursor: not-allowed;">
+              🔜 Coming Soon
+            </a>
+            <a href="#" class="btn-small btn-info">
+              📄 Details
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="section about-section">
+    <div class="about-content">
+      <div class="about-text">
+        <h3>연구 분야</h3>
+        <p>
+          고분자 공학(Polymer Engineering)과 중합(Polymerization)을 중심으로,
+          물리 기반 모델링과 데이터 기반 예측을 결합한 연구를 수행합니다.
+        </p>
+        <p>
+          생분해성 고분자부터 고성능 엔지니어링 플라스틱까지,
+          다양한 고분자 시스템의 구조-물성 관계를 탐구합니다.
+        </p>
+      </div>
+
+      <div class="focus-areas">
+        <div class="focus-item">
+          <h4>🧪 Polymerization</h4>
+          <p>중합 반응 메커니즘 및 공정 최적화</p>
+        </div>
+        <div class="focus-item">
+          <h4>🔬 Property Prediction</h4>
+          <p>Physics-informed ML 기반 물성 예측</p>
+        </div>
+        <div class="focus-item">
+          <h4>⚛️ Molecular Modeling</h4>
+          <p>분자동역학 시뮬레이션 및 구조 분석</p>
+        </div>
+        <div class="focus-item">
+          <h4>📊 Data Analysis</h4>
+          <p>실험 데이터 분석 및 시각화</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="social-links">
+        <a href="https://github.com/Yarn98" target="_blank" class="social-link" title="GitHub">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+        <a href="mailto:sorisem98@gmail.com" class="social-link" title="Email">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </a>
+      </div>
+      <p class="copyright">
+        © 2025 Polymer Engineering Research Hub. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Three.js 3D Polymer Visualization
+    let scene, camera, renderer, polymerGroup;
+
+    function init3D() {
+      const canvas = document.getElementById('polymer-canvas');
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.z = 30;
+
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+
+      // Create polymer chain (P3HB-co-4HB representation)
+      polymerGroup = new THREE.Group();
+
+      const chainLength = 25;
+      const spacing = 2;
+
+      for (let i = 0; i < chainLength; i++) {
+        // Carbon backbone (larger spheres)
+        const carbonGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+        const carbonMaterial = new THREE.MeshPhongMaterial({
+          color: 0x909090,
+          shininess: 30,
+          transparent: true,
+          opacity: 0.9
+        });
+        const carbon = new THREE.Mesh(carbonGeometry, carbonMaterial);
+
+        // Zigzag pattern for polymer chain
+        carbon.position.x = (i - chainLength / 2) * spacing;
+        carbon.position.y = Math.sin(i * 0.5) * 2;
+        carbon.position.z = Math.cos(i * 0.3) * 2;
+
+        polymerGroup.add(carbon);
+
+        // Add occasional oxygen (red) for ester groups
+        if (i % 4 === 0) {
+          const oxygenGeometry = new THREE.SphereGeometry(0.3, 16, 16);
+          const oxygenMaterial = new THREE.MeshPhongMaterial({
+            color: 0xff0d0d,
+            shininess: 50,
+            transparent: true,
+            opacity: 0.9
+          });
+          const oxygen = new THREE.Mesh(oxygenGeometry, oxygenMaterial);
+          oxygen.position.copy(carbon.position);
+          oxygen.position.y += 1.5;
+          polymerGroup.add(oxygen);
+
+          // Connect with line
+          const lineMaterial = new THREE.LineBasicMaterial({
+            color: 0xffffff,
+            opacity: 0.3,
+            transparent: true
+          });
+          const points = [carbon.position, oxygen.position];
+          const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+          const line = new THREE.Line(lineGeometry, lineMaterial);
+          polymerGroup.add(line);
+        }
+
+        // Connect carbons with bonds
+        if (i > 0) {
+          const prevCarbon = polymerGroup.children[polymerGroup.children.length - (i % 4 === 0 ? 4 : 2)];
+          if (prevCarbon && prevCarbon.geometry instanceof THREE.SphereGeometry) {
+            const bondMaterial = new THREE.LineBasicMaterial({
+              color: 0xffffff,
+              opacity: 0.4,
+              transparent: true
+            });
+            const bondPoints = [prevCarbon.position, carbon.position];
+            const bondGeometry = new THREE.BufferGeometry().setFromPoints(bondPoints);
+            const bond = new THREE.Line(bondGeometry, bondMaterial);
+            polymerGroup.add(bond);
+          }
+        }
+      }
+
+      scene.add(polymerGroup);
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+      scene.add(ambientLight);
+
+      const pointLight1 = new THREE.PointLight(0x00d4ff, 1, 100);
+      pointLight1.position.set(10, 10, 10);
+      scene.add(pointLight1);
+
+      const pointLight2 = new THREE.PointLight(0xff6b6b, 0.8, 100);
+      pointLight2.position.set(-10, -10, 10);
+      scene.add(pointLight2);
+
+      // Particles for depth
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particlesCount = 500;
+      const positions = new Float32Array(particlesCount * 3);
+
+      for (let i = 0; i < particlesCount * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 100;
+      }
+
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const particlesMaterial = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.1,
+        transparent: true,
+        opacity: 0.6
+      });
+      const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particles);
+
+      animate();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Rotate polymer chain
+      polymerGroup.rotation.x += 0.002;
+      polymerGroup.rotation.y += 0.003;
+
+      renderer.render(scene, camera);
+    }
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // Initialize when page loads
+    window.addEventListener('load', init3D);
+
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const projectCards = document.querySelectorAll('.project-card');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Update active button
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        button.classList.add('active');
+
+        const filter = button.dataset.filter;
+
+        // Filter projects
+        projectCards.forEach(card => {
+          if (filter === 'all' || card.dataset.category.includes(filter)) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
